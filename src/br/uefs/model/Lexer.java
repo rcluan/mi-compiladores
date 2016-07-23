@@ -43,7 +43,6 @@ public class Lexer {
 		
 		StringBuffer patternBuffer = new StringBuffer();
 		
-		// 
 		for(TokenType type : TokenType.values()){
 			
 			patternBuffer.append(String.format("|(?<%s>%s)", type.name(), type.pattern));
@@ -58,6 +57,55 @@ public class Lexer {
 			if(matcher.group(TokenType.PALAVRARESERVADA.name()) != null){
 				
 				tokens.add(new Token(TokenType.PALAVRARESERVADA, matcher.group(TokenType.PALAVRARESERVADA.name())));
+			}
+			if(matcher.group(TokenType.IDENTIFICADOR.name()) != null){
+				
+				tokens.add(new Token(TokenType.IDENTIFICADOR, matcher.group(TokenType.IDENTIFICADOR.name())));
+			}
+			if(matcher.group(TokenType.NUMERO.name()) != null){
+				
+				tokens.add(new Token(TokenType.NUMERO, matcher.group(TokenType.NUMERO.name())));
+			}
+			if(matcher.group(TokenType.DELIMITADOR.name()) != null){
+				
+				tokens.add(new Token(TokenType.DELIMITADOR, matcher.group(TokenType.DELIMITADOR.name())));
+			}
+			if(matcher.group(TokenType.CADEIA.name()) != null){
+				
+				tokens.add(new Token(TokenType.CADEIA, matcher.group(TokenType.CADEIA.name())));
+			}
+			if(matcher.group(TokenType.CARACTERE.name()) != null){
+				
+				tokens.add(new Token(TokenType.CARACTERE, matcher.group(TokenType.CARACTERE.name())));
+			}
+			if(matcher.group(TokenType.OPERADORARITMETICO.name()) != null){
+				
+				tokens.add(new Token(TokenType.OPERADORARITMETICO, matcher.group(TokenType.OPERADORARITMETICO.name())));
+			}
+			if(matcher.group(TokenType.OPERADORLOGICO.name()) != null){
+				
+				tokens.add(new Token(TokenType.OPERADORLOGICO, matcher.group(TokenType.OPERADORLOGICO.name())));
+			}
+			if(matcher.group(TokenType.OPERADORRELACIONAL.name()) != null){
+				
+				tokens.add(new Token(TokenType.OPERADORRELACIONAL, matcher.group(TokenType.OPERADORRELACIONAL.name())));
+			}
+			
+			if(matcher.group(TokenType.CADEIAMALFORMADA.name()) != null){
+				
+				tokens.add(new Token(TokenType.CADEIAMALFORMADA, TokenType.CADEIAMALFORMADA.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.CADEIANAOFECHADA.name()) != null){
+				
+				tokens.add(new Token(TokenType.CADEIANAOFECHADA, TokenType.CADEIANAOFECHADA.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.VALORINESPERADO.name()) != null){
+				
+				tokens.add(new Token(TokenType.VALORINESPERADO, TokenType.VALORINESPERADO.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.CARACTEREMALFORMADO.name()) != null){
+				
+				tokens.add(new Token(TokenType.CARACTEREMALFORMADO, TokenType.CARACTEREMALFORMADO.message, 0, matcher.start()));
 			}
 		}
 	}

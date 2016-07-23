@@ -64,7 +64,7 @@ public class Token {
 	public String toString() {
 		
 		return (column < 0 && line < 0) ? 
-				String.format("<%s, %s>", this.type.name(), this.value) :
-					String.format("<%s, %s, line %d, column %d>", this.type.name(), this.value, this.line, this.column);
+				String.format("<%s, %s >", this.type.name(), this.value) :
+					String.format("<%s, %s, linha %d, coluna %d >", this.type.name(), this.value, this.line, this.column);
 	}
 }
