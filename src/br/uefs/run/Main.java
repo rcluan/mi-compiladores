@@ -2,6 +2,7 @@ package br.uefs.run;
 
 import br.uefs.model.Lexer;
 import br.uefs.model.Token;
+import br.uefs.util.FileHandler;
 
 public class Main {
 
@@ -10,7 +11,8 @@ public class Main {
 		
 		Lexer lexer = new Lexer();
 		
-		lexer.regexAnalyse("\'1\'l");
+		//String input = FileHandler.readFile("");
+		lexer.regexAnalyse("2 2.2 .2");
 		
 		for(Token token : lexer.getTokens()){
 			

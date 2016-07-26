@@ -103,9 +103,25 @@ public class Lexer {
 				
 				tokens.add(new Token(TokenType.VALORINESPERADO, TokenType.VALORINESPERADO.message, 0, matcher.start()));
 			}
-			if(matcher.group(TokenType.CARACTEREMALFORMADO.name()) != null){
+			if(matcher.group(TokenType.CARACTEREMUITOGRANDE.name()) != null){
 				
-				tokens.add(new Token(TokenType.CARACTEREMALFORMADO, TokenType.CARACTEREMALFORMADO.message, 0, matcher.start()));
+				tokens.add(new Token(TokenType.CARACTEREMUITOGRANDE, TokenType.CARACTEREMUITOGRANDE.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.CARACTEREINVALIDO.name()) != null){
+				
+				tokens.add(new Token(TokenType.CARACTEREINVALIDO, TokenType.CARACTEREINVALIDO.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.CARACTEREVAZIO.name()) != null){
+				
+				tokens.add(new Token(TokenType.CARACTEREVAZIO, TokenType.CARACTEREVAZIO.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.CARACTERENAOFECHADO.name()) != null){
+				
+				tokens.add(new Token(TokenType.CARACTERENAOFECHADO, TokenType.CARACTERENAOFECHADO.message, 0, matcher.start()));
+			}
+			if(matcher.group(TokenType.NUMEROMALFORMADO.name()) != null){
+				
+				tokens.add(new Token(TokenType.NUMEROMALFORMADO, TokenType.NUMEROMALFORMADO.message, 0, matcher.start()));
 			}
 		}
 	}
