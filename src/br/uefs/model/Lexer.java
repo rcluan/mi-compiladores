@@ -123,6 +123,10 @@ public class Lexer {
 				
 				tokens.add(new Token(TokenType.NUMEROMALFORMADO, TokenType.NUMEROMALFORMADO.message, 0, matcher.start()));
 			}
+			if(matcher.group(TokenType.IDENTIFICADORMALFORMADO.name()) != null){
+				
+				tokens.add(new Token(TokenType.IDENTIFICADORMALFORMADO, TokenType.IDENTIFICADORMALFORMADO.message, 0, matcher.start()));
+			}
 		}
 	}
 }

@@ -12,7 +12,7 @@ public class Main {
 		Lexer lexer = new Lexer();
 		
 		//String input = FileHandler.readFile("");
-		lexer.regexAnalyse("2 2.2 .2");
+		lexer.regexAnalyse("\"a 2+2");
 		
 		for(Token token : lexer.getTokens()){
 			
