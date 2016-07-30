@@ -1,8 +1,9 @@
 package br.uefs.run;
 
 import br.uefs.model.Lexer;
+import br.uefs.model.PreprocessedInput;
 import br.uefs.model.Token;
-import br.uefs.util.FileHandler;
+import br.uefs.util.Preprocessor;
 
 public class Main {
 
@@ -11,9 +12,9 @@ public class Main {
 		
 		Lexer lexer = new Lexer();
 		
-		//String input = FileHandler.readFile("");
-		lexer.regexAnalyse("\"a 2+2");
+		PreprocessedInput input = Preprocessor.processFile("code2.txt");
 		
+		lexer.regexAnalyse(input);
 		for(Token token : lexer.getTokens()){
 			
 			System.out.println(token);

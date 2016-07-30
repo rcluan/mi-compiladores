@@ -1,16 +1,16 @@
 package br.uefs.model;
 
-import br.uefs.util.TokenType;
+import br.uefs.util.LexerGroup;
 
 public class Token {
 
-	private TokenType type;
+	private LexerGroup type;
 	private String value;
 	
 	private int line;
 	private int column;
 
-	public Token(TokenType type, String value) {
+	public Token(LexerGroup type, String value) {
 
 		this.setType(type);
 		this.setValue(value);
@@ -19,7 +19,7 @@ public class Token {
 		this.setColumn(-1);
 	}
 	
-	public Token(TokenType type, String value, int line, int column) {
+	public Token(LexerGroup type, String value, int line, int column) {
 
 		this.setType(type);
 		this.setValue(value);
@@ -28,11 +28,11 @@ public class Token {
 		this.setColumn(column);
 	}
 
-	public TokenType getType() {
+	public LexerGroup getType() {
 		return type;
 	}
 
-	public void setType(TokenType type) {
+	public void setType(LexerGroup type) {
 		this.type = type;
 	}
 

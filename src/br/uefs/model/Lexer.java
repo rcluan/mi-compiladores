@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import br.uefs.util.TokenType;
+import br.uefs.util.LexerGroup;
 
 public class Lexer {
 	
@@ -39,94 +39,110 @@ public class Lexer {
 	 * the input should be split and the analysis should restart disregard the previous error. This
 	 * is due so the Lexer can identify as many correct token as possible.
 	 */
-	public void regexAnalyse(String input){
+	public void regexAnalyse(PreprocessedInput preprocessedInput){
 		
 		StringBuffer patternBuffer = new StringBuffer();
 		
-		for(TokenType type : TokenType.values()){
+		for(LexerGroup type : LexerGroup.values()){
 			
 			patternBuffer.append(String.format("|(?<%s>%s)", type.name(), type.pattern));
 		}
 		
 		Pattern tokenPatterns = Pattern.compile(new String(patternBuffer.substring(1)));
 		
-		Matcher matcher = tokenPatterns.matcher(input);
+		String[] contents = preprocessedInput.getContent().split(LexerGroup.QUEBRALINHA.pattern);
 		
-		while(matcher.find()){
+		for(String input : contents){
 			
-			if(matcher.group(TokenType.PALAVRARESERVADA.name()) != null){
-				
-				tokens.add(new Token(TokenType.PALAVRARESERVADA, matcher.group(TokenType.PALAVRARESERVADA.name())));
-			}
-			if(matcher.group(TokenType.IDENTIFICADOR.name()) != null){
-				
-				tokens.add(new Token(TokenType.IDENTIFICADOR, matcher.group(TokenType.IDENTIFICADOR.name())));
-			}
-			if(matcher.group(TokenType.NUMERO.name()) != null){
-				
-				tokens.add(new Token(TokenType.NUMERO, matcher.group(TokenType.NUMERO.name())));
-			}
-			if(matcher.group(TokenType.DELIMITADOR.name()) != null){
-				
-				tokens.add(new Token(TokenType.DELIMITADOR, matcher.group(TokenType.DELIMITADOR.name())));
-			}
-			if(matcher.group(TokenType.CADEIA.name()) != null){
-				
-				tokens.add(new Token(TokenType.CADEIA, matcher.group(TokenType.CADEIA.name())));
-			}
-			if(matcher.group(TokenType.CARACTERE.name()) != null){
-				
-				tokens.add(new Token(TokenType.CARACTERE, matcher.group(TokenType.CARACTERE.name())));
-			}
-			if(matcher.group(TokenType.OPERADORARITMETICO.name()) != null){
-				
-				tokens.add(new Token(TokenType.OPERADORARITMETICO, matcher.group(TokenType.OPERADORARITMETICO.name())));
-			}
-			if(matcher.group(TokenType.OPERADORLOGICO.name()) != null){
-				
-				tokens.add(new Token(TokenType.OPERADORLOGICO, matcher.group(TokenType.OPERADORLOGICO.name())));
-			}
-			if(matcher.group(TokenType.OPERADORRELACIONAL.name()) != null){
-				
-				tokens.add(new Token(TokenType.OPERADORRELACIONAL, matcher.group(TokenType.OPERADORRELACIONAL.name())));
-			}
+			Matcher matcher = tokenPatterns.matcher(input);
 			
-			if(matcher.group(TokenType.CADEIAMALFORMADA.name()) != null){
+			while(matcher.find()){
 				
-				tokens.add(new Token(TokenType.CADEIAMALFORMADA, TokenType.CADEIAMALFORMADA.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.CADEIANAOFECHADA.name()) != null){
+				if(matcher.group(LexerGroup.PALAVRARESERVADA.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.PALAVRARESERVADA, matcher.group(LexerGroup.PALAVRARESERVADA.name())));
+				}
+				if(matcher.group(LexerGroup.IDENTIFICADOR.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.IDENTIFICADOR, matcher.group(LexerGroup.IDENTIFICADOR.name())));
+				}
+				if(matcher.group(LexerGroup.NUMERO.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.NUMERO, matcher.group(LexerGroup.NUMERO.name())));
+				}
+				if(matcher.group(LexerGroup.DELIMITADOR.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.DELIMITADOR, matcher.group(LexerGroup.DELIMITADOR.name())));
+				}
+				if(matcher.group(LexerGroup.CADEIA.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.CADEIA, matcher.group(LexerGroup.CADEIA.name())));
+				}
+				if(matcher.group(LexerGroup.CARACTERE.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.CARACTERE, matcher.group(LexerGroup.CARACTERE.name())));
+				}
+				if(matcher.group(LexerGroup.OPERADORARITMETICO.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.OPERADORARITMETICO, matcher.group(LexerGroup.OPERADORARITMETICO.name())));
+				}
+				if(matcher.group(LexerGroup.OPERADORLOGICO.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.OPERADORLOGICO, matcher.group(LexerGroup.OPERADORLOGICO.name())));
+				}
+				if(matcher.group(LexerGroup.OPERADORRELACIONAL.name()) != null){
+					
+					tokens.add(new Token(LexerGroup.OPERADORRELACIONAL, matcher.group(LexerGroup.OPERADORRELACIONAL.name())));
+				}
 				
-				tokens.add(new Token(TokenType.CADEIANAOFECHADA, TokenType.CADEIANAOFECHADA.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.VALORINESPERADO.name()) != null){
-				
-				tokens.add(new Token(TokenType.VALORINESPERADO, TokenType.VALORINESPERADO.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.CARACTEREMUITOGRANDE.name()) != null){
-				
-				tokens.add(new Token(TokenType.CARACTEREMUITOGRANDE, TokenType.CARACTEREMUITOGRANDE.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.CARACTEREINVALIDO.name()) != null){
-				
-				tokens.add(new Token(TokenType.CARACTEREINVALIDO, TokenType.CARACTEREINVALIDO.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.CARACTEREVAZIO.name()) != null){
-				
-				tokens.add(new Token(TokenType.CARACTEREVAZIO, TokenType.CARACTEREVAZIO.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.CARACTERENAOFECHADO.name()) != null){
-				
-				tokens.add(new Token(TokenType.CARACTERENAOFECHADO, TokenType.CARACTERENAOFECHADO.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.NUMEROMALFORMADO.name()) != null){
-				
-				tokens.add(new Token(TokenType.NUMEROMALFORMADO, TokenType.NUMEROMALFORMADO.message, 0, matcher.start()));
-			}
-			if(matcher.group(TokenType.IDENTIFICADORMALFORMADO.name()) != null){
-				
-				tokens.add(new Token(TokenType.IDENTIFICADORMALFORMADO, TokenType.IDENTIFICADORMALFORMADO.message, 0, matcher.start()));
+				if(matcher.group(LexerGroup.CADEIAMALFORMADA.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CADEIAMALFORMADA.name());
+					tokens.add(new Token(LexerGroup.CADEIAMALFORMADA, LexerGroup.CADEIAMALFORMADA.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.CADEIANAOFECHADA.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CADEIANAOFECHADA.name());
+					tokens.add(new Token(LexerGroup.CADEIANAOFECHADA, LexerGroup.CADEIANAOFECHADA.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.VALORINESPERADO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.VALORINESPERADO.name());
+					tokens.add(new Token(LexerGroup.VALORINESPERADO, LexerGroup.VALORINESPERADO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.CARACTEREMUITOGRANDE.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CARACTEREMUITOGRANDE.name());
+					tokens.add(new Token(LexerGroup.CARACTEREMUITOGRANDE, LexerGroup.CARACTEREMUITOGRANDE.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.CARACTEREINVALIDO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CARACTEREINVALIDO.name());
+					tokens.add(new Token(LexerGroup.CARACTEREINVALIDO, LexerGroup.CARACTEREINVALIDO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.CARACTEREVAZIO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CARACTEREVAZIO.name());
+					tokens.add(new Token(LexerGroup.CARACTEREVAZIO, LexerGroup.CARACTEREVAZIO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.CARACTERENAOFECHADO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.CARACTERENAOFECHADO.name());
+					tokens.add(new Token(LexerGroup.CARACTERENAOFECHADO, LexerGroup.CARACTERENAOFECHADO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.NUMEROMALFORMADO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.NUMEROMALFORMADO.name());
+					tokens.add(new Token(LexerGroup.NUMEROMALFORMADO, LexerGroup.NUMEROMALFORMADO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
+				if(matcher.group(LexerGroup.IDENTIFICADORMALFORMADO.name()) != null){
+					
+					String pattern = matcher.group(LexerGroup.IDENTIFICADORMALFORMADO.name());
+					tokens.add(new Token(LexerGroup.IDENTIFICADORMALFORMADO, LexerGroup.IDENTIFICADORMALFORMADO.message, preprocessedInput.getOriginalLineNumber(pattern), matcher.start()));
+				}
 			}
 		}
+
+		
 	}
 }
