@@ -23,9 +23,9 @@ public class PreprocessedInput {
 		this.originalContent = originalContent;
 	}
 	
-	public int getOriginalLineNumber(String pattern){
+	public int getOriginalLineNumber(int currentLine, String pattern){
 		
-		for(int i = 0; i < originalContent.size(); i++){
+		for(int i = currentLine; i < originalContent.size(); i++){
 			
 			String content = originalContent.get(i);
 			

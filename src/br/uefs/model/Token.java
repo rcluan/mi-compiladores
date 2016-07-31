@@ -10,12 +10,12 @@ public class Token {
 	private int line;
 	private int column;
 
-	public Token(LexerGroup type, String value) {
+	public Token(LexerGroup type, String value, int line) {
 
 		this.setType(type);
 		this.setValue(value);
 		
-		this.setLine(-1);
+		this.setLine(line);
 		this.setColumn(-1);
 	}
 	
@@ -63,8 +63,8 @@ public class Token {
 	@Override
 	public String toString() {
 		
-		return (column < 0 && line < 0) ? 
-				String.format("<%s, %s >", this.type.name(), this.value) :
-					String.format("<%s, %s, linha %d, coluna %d >", this.type.name(), this.value, this.line, this.column);
+		return (column < 0) ? 
+				String.format("%d [%s, %s ]", this.line, this.type.name(), this.value) :
+					String.format("%d:%d [%s, %s ]", this.line, this.column, this.type.name(), this.value);
 	}
 }

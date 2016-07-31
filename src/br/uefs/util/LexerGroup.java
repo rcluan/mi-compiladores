@@ -10,8 +10,8 @@ public enum LexerGroup {
 			+ "senao|enquanto|faca|leia|escreva|inteiro|real|booleano|"
 			+ "verdadeiro|falso|cadeia|caractere)\\b", ""),
 	OPERADORLOGICO("\\b(nao|e|ou)\\b", ""),
-	IDENTIFICADOR("((?<=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){0-9]|^)[a-zA-Z][a-zA-Z0-9_]*(?=[\\.\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){0-9]|$))", ""),
-	NUMERO("((?<=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|^)[0-9]+([.][0-9]+)?(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", ""),
+	IDENTIFICADOR("((?<=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|^)[a-zA-Z][a-zA-Z0-9_]*(?=[\\.\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))", ""),
+	NUMERO("((?<=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|^)[0-9]+([.][0-9]+)?(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))", ""),
 	COMENTARIO("\\{(.|[\r\n])*?\\}", ""),
 	OPERADORARITMETICO("\\+|\\-|\\*|\\/", ""),
 	OPERADORRELACIONAL("[<>]?=|[<?]>|[<>]", ""),
@@ -33,7 +33,7 @@ public enum LexerGroup {
 	
 	NUMEROMALFORMADO("([0-9]*\\.[.|!|:|^|~|´|`|_|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|a-zA-Z0-9]*(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O número está mal formado"),
 	
-	IDENTIFICADORMALFORMADO("([a-zA-Z][.|!|:|^|~|´|`|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|a-zA-Z0-9_]+(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O identificador está mal formado");
+	IDENTIFICADORMALFORMADO("([a-zA-Z][.|!|:|^|~|´|`|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|a-zA-Z0-9_}]+(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O identificador está mal formado");
 	
 	public final String pattern;
 	public final String message;

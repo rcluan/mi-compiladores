@@ -1,33 +1,53 @@
 package br.uefs.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import br.uefs.model.Token;
 
 public class FileHandler {
-	
-	public static BufferedReader readFile(String file){
-		
+
+	public static BufferedReader readFile(String file) {
+
 		BufferedReader bufferedReader = null;
+
+		try {
+
+			bufferedReader = new BufferedReader(new FileReader(file));
+
+		} catch (FileNotFoundException e) {
+
+			System.err.println("File could not be found");
+
+		}
+
+		return bufferedReader;
+	}
+
+	public static void writeFile(String file, List<Token> tokens) {
+
+		BufferedWriter writer = null;
 		
 		try {
 			
-			bufferedReader = new BufferedReader(new FileReader(file));
+			writer = new BufferedWriter(new FileWriter(file + "_result.txt"));
 			
-		} catch (FileNotFoundException e) {
+			for(Token token : tokens){
+				
+				writer.write(token.toString());
+				writer.newLine();
+			}
 			
-			System.err.println("File could not be found");
+			writer.close();
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		return bufferedReader;
-	}
-	
-	public static void writeFile(String file, List<Token> tokens){
-		
-		
 	}
 }
