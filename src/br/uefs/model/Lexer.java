@@ -30,14 +30,15 @@ public class Lexer {
 	 * for each token, it needs to create a named group associating a token type pattern 
 	 * to its name in the following format (?<TYPE>PATTERN>).
 	 * 
-	 * The source code is represented in its full-length by the parameter input.
 	 * 
-	 * If a well-formatted value is identified, a token <TYPE, VALUE> is produced.
+	 * If a well-formatted value is identified, a token x [TYPE, VALUE] is produced, where
+	 * x is the line number.
 	 * 
 	 * If by any chance the matcher finds a bad-formatted value when analysing the input,
-	 * then the erroneous value is identified by a token <TYPE, VALUE, LINE, COLUMN>. Afterwards,
-	 * the input should be split and the analysis should restart disregard the previous error. This
-	 * is due so the Lexer can identify as many correct token as possible.
+	 * then the erroneous value is identified by a token x:y [TYPE, VALUE MSG], where x is
+	 * the line number, y the column number and MSG a error message for the given TYPE.
+	 * 
+	 * @param preprocessedInput the preprocessed input containing both the original file content and the file content without commentaries
 	 */
 	public void regexAnalyse(PreprocessedInput preprocessedInput){
 		

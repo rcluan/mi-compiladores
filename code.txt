@@ -6,7 +6,7 @@ funcao conta(inteiro i, inteiro n)
   inicio
    enquanto (i < n)
      inicio
-      escreva (i@+1);
+      escreva (i@+1); }
       i = i+1;
      fim
   fim
