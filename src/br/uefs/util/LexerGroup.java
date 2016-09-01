@@ -20,20 +20,20 @@ public enum LexerGroup {
 	CARACTERE("\'([a-z]|[A-Z]|[0-9])\'", ""),
 	QUEBRALINHA("\\r\\n", ""),
 	
-	VALORINESPERADO("([\\}|.|!|:|^|~|´|`|_|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|]+(.*?)(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))","Valor inesperado"),
+	VALORINESPERADO("([\\}|.|!|:|^|~|Â´|`|_|!|?|@|#|$|%|Â¬|&|\\[|\\]|Âº|Âª|\\|]+(.*?)(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))","Valor inesperado"),
 	
-	COMENTARIOMALFORMADO("\\{(.|[\r\n])*", "O comentário está mal formado"),
-	CADEIAMALFORMADA("\"([^a-zA-Z])*(.*?)\"", "A cadeia possui caracteres inválidos ou está vazia"),
-	CADEIANAOFECHADA("(\"(.*?)(?=[\n]|$))", "A cadeia de caracteres não foi fechada"),
+	COMENTARIOMALFORMADO("\\{(.|[\r\n])*", "O comentÃ¡rio estÃ¡ mal formado"),
+	CADEIAMALFORMADA("\"([^a-zA-Z])*(.*?)\"", "A cadeia possui caracteres invÃ¡lidos ou estÃ¡ vazia"),
+	CADEIANAOFECHADA("(\"(.*?)(?=[\n]|$))", "A cadeia de caracteres nÃ£o foi fechada"),
 	
-	CARACTEREMUITOGRANDE("\'([a-z]|[A-Z]|[0-9])+\'", "O caractere possui valores permitidos mas seu comprimento é inválido"),
-	CARACTEREVAZIO("\'( )*\'", "O caractere não pode ser vazio"),
-	CARACTEREINVALIDO("\'([+|-|*|/|.|!|:|^|~|´|`|_|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|])(.*?)\'", "O caractere possui valores inválidos"),
-	CARACTERENAOFECHADO("\'([a-zA-Z]|[0-9](?=[\"\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))", "O caractere não foi encerrado com aspas simples"),
+	CARACTEREMUITOGRANDE("\'([a-z]|[A-Z]|[0-9])+\'", "O caractere possui valores permitidos mas seu comprimento Ã© invÃ¡lido"),
+	CARACTEREVAZIO("\'( )*\'", "O caractere nÃ£o pode ser vazio"),
+	CARACTEREINVALIDO("\'([+|-|*|/|.|!|:|^|~|Â´|`|_|!|?|@|#|$|%|Â¬|&|\\[|\\]|Âº|Âª|\\|])(.*?)\'", "O caractere possui valores invÃ¡lidos"),
+	CARACTERENAOFECHADO("\'([a-zA-Z]|[0-9](?=[\"\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){]|$))", "O caractere nÃ£o foi encerrado com aspas simples"),
 	
-	NUMEROMALFORMADO("([0-9]*\\.[.|!|:|^|~|´|`|_|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|a-zA-Z0-9]*(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O número está mal formado"),
+	NUMEROMALFORMADO("([0-9]*\\.[.|!|:|^|~|Â´|`|_|!|?|@|#|$|%|Â¬|&|\\[|\\]|Âº|Âª|\\|a-zA-Z0-9]*(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O nÃºmero estÃ¡ mal formado"),
 	
-	IDENTIFICADORMALFORMADO("([a-zA-Z][.|!|:|^|~|´|`|!|?|@|#|$|%|¬|&|\\[|\\]|º|ª|\\|a-zA-Z0-9_}]+(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O identificador está mal formado");
+	IDENTIFICADORMALFORMADO("([a-zA-Z][.|!|:|^|~|Â´|`|!|?|@|#|$|%|Â¬|&|\\[|\\]|Âº|Âª|\\|a-zA-Z0-9_}]+(?=[\"\'\\+\\-\\*\\/;,\\s[<>]?=[<?]>[<>](){a-zA-Z]|$))", "O identificador estÃ¡ mal formado");
 	
 	public final String pattern;
 	public final String message;

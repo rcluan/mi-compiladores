@@ -3,6 +3,7 @@ package br.uefs.run;
 import java.util.Scanner;
 
 import br.uefs.model.Lexer;
+import br.uefs.model.Parser;
 import br.uefs.model.PreprocessedInput;
 import br.uefs.util.FileHandler;
 import br.uefs.util.Preprocessor;
@@ -18,7 +19,7 @@ public class Main {
 		
 		while(true){
 			
-			System.out.println("Digite o nome do arquivo, inclusive sua extens„o (e.g. code.txt)");
+			System.out.println("Digite o nome do arquivo, inclusive sua extens√£o (e.g. code.txt)");
 			String file = scanner.nextLine();
 			
 			String[] fileSplitted = file.split("\\.");
@@ -29,8 +30,10 @@ public class Main {
 			PreprocessedInput input = Preprocessor.processFile(filename + "." + extension);
 			
 			lexer.regexAnalyse(input);
-			
 			FileHandler.writeFile(filename, lexer.getTokens());
+			
+			Parser parser = new Parser();
+			parser.parseFile(lexer.getTokens());
 		}
 	}
 
