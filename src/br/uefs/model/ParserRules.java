@@ -13,8 +13,25 @@ public class ParserRules {
 	}
 
 	public void constants(){
+		//<constantes> ::=  'const'  'inicio' <bloco_constantes>  'fim'  | <lambda>
+		parseTerminals("const", "inicio");
+		nextToken();
+		constantsBlock();
+		nextToken();
+		parseTerminal("fim");
+	}
+	
+	public void constantsBlock(){
+		//<bloco_constantes> ::=  <tipo_variavel> <declaracao_const> | <lambda>
 		
-		//TODO belongs to file rule
+		//algum parser pra primirtivo
+		constantsDeclarate();
+		
+	}
+	
+	public void constantsDeclarate(){
+		
+		
 	}
 	
 	public void globalVariable(){
@@ -233,6 +250,21 @@ public class ParserRules {
 			return true;
 		
 		return false;
+	}
+	
+	private void parseTerminals(String... terminals) {
+		for (String terminal : terminals ) {
+			this.parseTerminal(terminal);
+			nextToken();
+		}
+	}
+	
+	private void parseTerminal(String terminal) {
+		System.out.println("Parsing " + terminal);
+		Token current = this.getCurrentToken();
+		if(!current.is(terminal)) {
+			System.out.println("Esperava" + terminal + " mas veio " + current.getValue());
+		};
 	}
 	
 	private void semicolon(){

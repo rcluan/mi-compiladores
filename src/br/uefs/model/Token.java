@@ -60,6 +60,10 @@ public class Token {
 		this.column = column;
 	}
 
+	public boolean is(String rep) {
+		return this.getValue().equals(rep);
+	}
+	
 	@Override
 	public String toString() {
 		
