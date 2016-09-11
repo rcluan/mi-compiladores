@@ -1,4 +1,4 @@
-{const inteiro max = 20;}
+const inteiro max = conta(2+2);
 var booleano numeros<<max>>;
 
 var real valor;
