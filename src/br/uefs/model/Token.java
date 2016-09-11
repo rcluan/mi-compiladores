@@ -71,4 +71,26 @@ public class Token {
 				String.format("%d [%s, %s ]", this.line, this.type.name(), this.value) :
 					String.format("%d:%d [%s, %s ]", this.line, this.column, this.type.name(), this.value);
 	}
+	
+	@Override
+	public boolean equals(Object obj){
+		
+		if(obj instanceof Token){
+			
+			Token token = (Token) obj;
+			return (this.getType().equals(token.getType()) && this.getValue().equals(token.getValue()));
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		
+		int hash = 7;
+		
+		return 17 * hash + 
+				(this.getValue() != null ? Integer.parseInt(this.getValue()) : 0) + 
+				(this.getType() != null ? Integer.parseInt(this.getType().name()) : 0);
+	}
 }

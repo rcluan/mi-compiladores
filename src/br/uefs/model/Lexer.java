@@ -194,4 +194,21 @@ public class Lexer {
 
 		
 	}
+
+	public boolean hasNoErrors() {
+		
+		for(Token token : tokens){
+			
+			LexerGroup type = token.getType();
+			
+			if(type.equals(LexerGroup.NUMEROMALFORMADO) || type.equals(LexerGroup.IDENTIFICADORMALFORMADO) || 
+					type.equals(LexerGroup.COMENTARIOMALFORMADO) || type.equals(LexerGroup.CARACTEREINVALIDO) ||
+					type.equals(LexerGroup.CARACTEREMUITOGRANDE) || type.equals(LexerGroup.CARACTERENAOFECHADO) ||
+					type.equals(LexerGroup.CARACTEREVAZIO) || type.equals(LexerGroup.VALORINESPERADO) || 
+					type.equals(LexerGroup.CADEIAMALFORMADA) || type.equals(LexerGroup.CADEIANAOFECHADA))
+				return false;
+		}
+		
+		return true;
+	}
 }

@@ -32,8 +32,17 @@ public class Main {
 			lexer.regexAnalyse(input);
 			FileHandler.writeFile(filename, lexer.getTokens());
 			
-			Parser parser = new Parser();
-			parser.parseFile(lexer.getTokens());
+			if(lexer.hasNoErrors()){
+				
+				Parser parser = new Parser(lexer.getTokens());
+				parser.parse();
+				
+				for(String error : parser.getSyntacticErrors())
+					System.out.println(error);
+			}else{
+				
+				System.err.println("Erros léxicos no código");
+			}
 		}
 	}
 
