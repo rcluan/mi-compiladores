@@ -7,5 +7,5 @@ programa
   inicio
     valor = conta();
     valor = (valor / 5)*10;
-    escreva(valor);
+    conta();
   fim

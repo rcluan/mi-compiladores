@@ -3,6 +3,8 @@ package br.uefs.model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import br.uefs.util.LexerGroup;
 
@@ -10,6 +12,8 @@ public class Parser {
 
 	private List<Token> tokens;
 	private Iterator<Token> tokensIt;
+	
+	private Queue<String> parentheses;
 
 	private Token currentToken;
 	private int currentTokenId;
@@ -26,57 +30,11 @@ public class Parser {
 		
 		this.setSyntacticErrors(new ArrayList<>());
 		
+		this.setParentheses(new PriorityQueue<>());
+		
 		nextToken();
-
-		//parseLL(ParserRules.arquivo);
 	}
-/*
-	public void parseLL(ParserRules rules) {
-
-		if (rules.equals(ParserRules.arquivo)) {
-
-		}
-
-		for (String rule : rules.production) {
-
-			flag = false;
-			String productions[] = rule.split(" ");
-
-			for (String production : productions) {
-
-				if (notTerminal(production) && !flag) {
-
-					parseLL(ParserRules.valueOf(production));
-				} else if (tokens.get(currentToken).getValue().equals(production)) {
-
-					System.out.println(production);
-					;
-					return;
-				} else if (tokens.get(currentToken).getType().name().equals(production)) {
-
-					System.out.println(production);
-					;
-					return;
-				} else {
-
-					flag = true;
-				}
-			}
-
-		}
-		return;
-	}
-
-	private boolean notTerminal(String production) {
-
-		for (ParserRules rule : ParserRules.values()) {
-
-			if (rule.name().equals(production))
-				return true;
-		}
-		return false;
-	}
-*/
+	
 	public void parse() {
 
 		if(hasProgram(tokens)){
@@ -107,6 +65,8 @@ public class Parser {
 		case "programa":
 			
 			nextToken();
+			block();
+			
 			return;
 		case "funcao":
 			
@@ -115,6 +75,127 @@ public class Parser {
 		default:
 			return;
 		}
+	}
+
+	private void block() {
+		
+		terminal("inicio");
+		blockContent();
+		terminal("fim");
+		
+	}
+	private void blockContent() {
+		
+		switch(currentToken.getValue()){
+		
+		case "var":
+			
+			nextToken();
+			declareVar();
+			blockContent();
+			return;
+		case "se":
+			
+			nextToken();
+			ifCommand();
+			return;
+		case "enquanto":
+			
+			nextToken();
+			whileCommand();
+			return;
+		case "escreva":
+			
+			nextToken();
+			writeCommand();
+			return;
+		case "leia":
+			
+			nextToken();
+			readCommand();
+			return;
+		default:
+			
+			if(hasProgramEnd()){
+				
+				return;
+			}
+
+			isIdBlockContent();
+			blockContent();
+		}
+		
+	}
+	
+	private boolean hasProgramEnd(){
+		
+		if(currentToken.getValue().equals("fim"))
+			return true;
+		
+		return false;
+	}
+	private void isIdBlockContent() {
+		
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
+			
+			idBlockContentLookahead();
+			return;
+		default:
+			
+			int line = this.lookahead().getLine();
+			String got = this.lookahead().getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, "var", "se", "enquanto", "escreva", 
+					"leia", LexerGroup.IDENTIFICADOR.name(), got));
+			return;
+		}
+		
+	}
+
+	private void idBlockContentLookahead() {
+		
+		switch(this.lookahead().getValue()){
+		
+		case "(":
+			
+			openFunctionCall();
+			terminal(")");
+			terminal(";");
+			
+			return;
+		default:
+			
+			nextToken();
+			assignTerm();
+			return;
+		}
+	}
+
+	private void ifCommand() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void whileCommand() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void writeCommand() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void readCommand() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void functionCall() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private boolean hasProgram(List<Token> tokens) {
@@ -227,6 +308,7 @@ public class Parser {
 			return;
 		case "=":
 			
+			nextToken();
 			assignValue();
 			constList();
 			return;
@@ -262,27 +344,10 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), terminal, currentToken.getValue()));
 		}
 	}
-	
-	private void assign(){
-		
-		switch (currentToken.getType()) {
-
-		case IDENTIFICADOR:
-			
-			assignTerm();
-			return;
-		default:
-			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(), 
-					currentToken.getType().name()));
-			return;
-		}
-	}
 
 	private void assignTerm() {
 		
-		;
-		
-		switch(this.lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case "<":
 			
@@ -293,8 +358,7 @@ public class Parser {
 			terminal(";");
 			return;
 		case "=":
-			
-			nextToken();
+
 			assignValue();
 			terminal(";");
 			return;
@@ -307,6 +371,7 @@ public class Parser {
 	private void assignValue() {
 		
 		nextToken();
+
 		switch(currentToken.getType()){
 		
 		case CADEIA:
@@ -336,8 +401,9 @@ public class Parser {
 			
 			default:
 				
-				nextToken();
+				//nextToken();
 				aritExp();
+				nextToken();
 				return;
 			}
 		}
@@ -349,26 +415,41 @@ public class Parser {
 		
 		case "(":
 			
-			aritExp();
-			terminal(")");
+			parentheses.add("(");
+			checkClosure();
 			return;
 		default:
 			
 			switch(currentToken.getType()){
 			
 			case IDENTIFICADOR:
+				
 				switch(lookahead().getValue()){
 				
 				case "(":
-					nextToken();
+
 					openFunctionCall();
 					return;
 				default:
 					
 					aritExpHP();
+					
+					if(!parentheses.isEmpty()){
+						
+						checkClosure();
+					}
+					
+					aritExpHP();
 					return;
 				}
 			case NUMERO:
+				
+				aritExpHP();
+				
+				if(!parentheses.isEmpty()){
+					
+					checkClosure();
+				}
 				
 				aritExpHP();
 				return;
@@ -381,6 +462,21 @@ public class Parser {
 		}
 	}
 	
+	private void checkClosure() {
+
+		switch(lookahead().getValue()){
+		
+		case ")":
+			nextToken();
+			parentheses.poll();
+			return;
+		default:
+			nextToken();
+			aritExp();
+			return;
+		}
+	}
+
 	private void aritExpHP(){
 		
 		switch(lookahead().getValue()){
@@ -473,8 +569,11 @@ public class Parser {
 		
 		nextToken();
 		functionParamContent();
-		nextToken();
-		terminal(")");
+		
+		if(!currentToken.getValue().equals(")"))
+			nextToken();
+		
+		return;
 	}
 	
 	private void functionParamContent(){
@@ -520,7 +619,12 @@ public class Parser {
 	private void  nextToken(){
 		
 		currentTokenId += 1;
-		setCurrentToken(tokensIt.next());
+		
+		if(tokensIt.hasNext()){
+			setCurrentToken(tokensIt.next());
+		}
+		else
+			setCurrentToken(null);
 	}
 
 	public List<String> getSyntacticErrors() {
@@ -558,5 +662,13 @@ public class Parser {
 	}
 	public void setCurrentTokenId(int currentTokenId) {
 		this.currentTokenId = currentTokenId;
+	}
+
+	public Queue<String> getParentheses() {
+		return parentheses;
+	}
+
+	public void setParentheses(Queue<String> parentheses) {
+		this.parentheses = parentheses;
 	}
 }
