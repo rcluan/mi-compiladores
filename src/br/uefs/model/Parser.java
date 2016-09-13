@@ -97,22 +97,30 @@ public class Parser {
 		case "se":
 			
 			nextToken();
+
 			ifCommand();
+			blockContent();
 			return;
 		case "enquanto":
 			
 			nextToken();
+			
 			whileCommand();
+			blockContent();
 			return;
 		case "escreva":
 			
 			nextToken();
+			
 			writeCommand();
+			blockContent();
 			return;
 		case "leia":
 			
 			nextToken();
+			
 			readCommand();
+			blockContent();
 			return;
 		default:
 			
@@ -123,6 +131,8 @@ public class Parser {
 
 			isIdBlockContent();
 			blockContent();
+			
+			return;
 		}
 		
 	}
@@ -160,9 +170,7 @@ public class Parser {
 		
 		case "(":
 			
-			openFunctionCall();
-			terminal(")");
-			terminal(";");
+			functionCall();
 			
 			return;
 		default:
@@ -184,18 +192,139 @@ public class Parser {
 	}
 
 	private void writeCommand() {
-		// TODO Auto-generated method stub
 		
+		switch(currentToken.getValue()){
+		
+		case "(":
+			
+			writeCmdContent();
+			return;
+		default:
+
+			int line = lookahead().getLine();
+			String got = lookahead().getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, "(", got));
+			return;
+		}
+	}
+
+	private void writeCmdContent() {
+		
+		switch(lookahead().getType()){
+		
+		case CARACTERE:
+			
+			nextToken();
+			writeCmdContentList();
+			return;
+		case CADEIA:
+			
+			nextToken();
+			writeCmdContentList();
+			return;
+		default:
+			
+			aritExp();
+			writeCmdContentList();
+			return;
+		}
+	}
+
+	private void writeCmdContentList() {
+		
+		switch(lookahead().getValue()){
+		
+		case ",":
+			
+			nextToken();
+			terminal(",");
+			writeCmdContent();
+			return;
+		case ")":
+			
+			nextToken();
+			terminal(")");
+			terminal(";");
+			return;
+		default:
+			
+			int line = lookahead().getLine();
+			String got = lookahead().getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
+			return;
+		}
 	}
 
 	private void readCommand() {
-		// TODO Auto-generated method stub
 		
+		switch(currentToken.getValue()){
+		
+		case "(":
+			
+			nextToken();
+			readCmdContent();
+			return;
+		default:
+
+			int line = lookahead().getLine();
+			String got = lookahead().getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, "(", got));
+			return;
+		}
+	}
+
+	private void readCmdContent() {
+		
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
+			
+			readCmdContentList();
+			return;
+		default:
+
+			int line = lookahead().getLine();
+			String got = lookahead().getType().name();
+			
+			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), got));
+			return;
+		}
+	}
+
+	private void readCmdContentList() {
+		
+		switch(lookahead().getValue()){
+		
+		case ",":
+			
+			nextToken();
+			terminal(",");
+			readCmdContent();
+			return;
+		case ")":
+			
+			nextToken();
+			terminal(")");
+			terminal(";");
+			return;
+		default:
+			
+			int line = lookahead().getLine();
+			String got = lookahead().getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
+			return;
+		}
 	}
 
 	private void functionCall() {
-		// TODO Auto-generated method stub
 		
+		openFunctionCall();
+		terminal(")");
+		terminal(";");
 	}
 
 	private boolean hasProgram(List<Token> tokens) {
