@@ -67,12 +67,47 @@ public class Parser {
 			nextToken();
 			block();
 			
+			function();
 			return;
-		case "funcao":
+		
+		default:
+			return;
+		}
+	}
+
+	private void function() {
+
+		switch(currentToken.getValue()){
+		
+			case "funcao":
 			
 			nextToken();
+			
+			if(type(lookahead())){
+
+				nextToken();
+				nextToken();
+			}
+
+			declareFunction();
+			return;
+		}
+	}
+
+	private void declareFunction() {
+		
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
+			
+			nextToken();
+			terminal("(");
+			declareVar(); //TODO change
+			terminal(")");
 			return;
 		default:
+			
+			//TODO error expecting id
 			return;
 		}
 	}
@@ -97,29 +132,45 @@ public class Parser {
 		case "se":
 			
 			nextToken();
-
-			ifCommand();
+			terminal("(");
+			
+			logicExp();
+			terminal(")");
+			
+			terminal("entao");
+			block();
+			
+			hasElse();
+			
 			blockContent();
 			return;
 		case "enquanto":
 			
 			nextToken();
+			terminal("(");
 			
-			whileCommand();
+			logicExp();
+			terminal(")");
+			
+			terminal("faca");
+			block();
+			
 			blockContent();
 			return;
 		case "escreva":
 			
 			nextToken();
+			terminal("(");
 			
-			writeCommand();
+			writeCmdContent();
 			blockContent();
 			return;
 		case "leia":
 			
 			nextToken();
+			terminal("(");
 			
-			readCommand();
+			readCmdContent();
 			blockContent();
 			return;
 		default:
@@ -137,6 +188,25 @@ public class Parser {
 		
 	}
 	
+	private void logicExp() {
+		
+		
+	}
+
+	private void hasElse() {
+		
+		switch(currentToken.getValue()){
+		
+		case "senao":
+			
+			nextToken();
+			block();
+			return;
+		default:
+			return;
+		}
+	}
+
 	private boolean hasProgramEnd(){
 		
 		if(currentToken.getValue().equals("fim"))
@@ -177,34 +247,6 @@ public class Parser {
 			
 			nextToken();
 			assignTerm();
-			return;
-		}
-	}
-
-	private void ifCommand() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void whileCommand() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void writeCommand() {
-		
-		switch(currentToken.getValue()){
-		
-		case "(":
-			
-			writeCmdContent();
-			return;
-		default:
-
-			int line = lookahead().getLine();
-			String got = lookahead().getValue();
-			
-			syntacticErrors.add(buildErrorLog(line, "(", got));
 			return;
 		}
 	}
@@ -253,25 +295,6 @@ public class Parser {
 			String got = lookahead().getValue();
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
-			return;
-		}
-	}
-
-	private void readCommand() {
-		
-		switch(currentToken.getValue()){
-		
-		case "(":
-			
-			nextToken();
-			readCmdContent();
-			return;
-		default:
-
-			int line = lookahead().getLine();
-			String got = lookahead().getValue();
-			
-			syntacticErrors.add(buildErrorLog(line, "(", got));
 			return;
 		}
 	}
@@ -739,7 +762,7 @@ public class Parser {
 				|| token.getValue().equals("cadeia") || token.getValue().equals("caractere")
 				|| token.getValue().equals("booleano"));
 	}
-
+	
 	private Token lookahead() {
 		
 		return tokens.get(currentTokenId+1);

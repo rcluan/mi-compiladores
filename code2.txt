@@ -5,6 +5,7 @@ var real valor;
 
 programa
   inicio
+    var cadeia hello;
     valor = conta();
     valor = (valor / 5)*10;
     escreva(conta());
