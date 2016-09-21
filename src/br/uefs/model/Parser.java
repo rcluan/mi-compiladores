@@ -42,7 +42,7 @@ public class Parser {
 			parseLL();
 		}else{
 			
-			syntacticErrors.add("O código não possui o trecho 'programa'");
+			syntacticErrors.add("O codigo nao possui o trecho 'programa'");
 		}
 	}
 	
@@ -189,8 +189,143 @@ public class Parser {
 	}
 	
 	private void logicExp() {
+
+		switch(currentToken.getValue()){
+
+		case "(":
+			parentheses.add("(");
+			nextToken();
+			switch(lookahead().getValue()){
+			case ")":
+				parentheses.poll();
+				nextToken();
+				return;
+			
+			default:
+				nextToken();
+				logicExp();
+				return;
+			}
+		case "nao":
+			nextToken();
+			logicExpRoot();
+			return;
+			
+		default:
+			switch(currentToken.getType()){
+			case IDENTIFICADOR:
+				nextToken();
+				relatExpTerm();
+				return;
+
+			case NUMERO:
+				nextToken();
+				relatExpTerm();
+				return;
+				
+			default:
+				int line = lookahead().getLine();
+				String got = lookahead().getValue();
+				syntacticErrors.add(buildErrorLog(line, "Identificador", "Numero", "(", "nao", got));	
+				return;
+			}
+		}	
+	}
+	
+	
+	
+	private void logicExpRoot(){
+		switch(currentToken.getType()){
 		
+		case IDENTIFICADOR:
+			nextToken();
+			relatExpTerm();
 		
+		case NUMERO:
+			nextToken();
+			relatExpTerm();
+		default:
+			switch(currentToken.getValue()){
+			case "(":
+				nextToken();
+				logicExp();
+			default:
+				//erro
+			}
+		}
+	}
+	
+	private void logicExpTerm(){
+		
+		switch(currentToken.getValue()){
+		case "e":
+			nextToken();
+			logicExp();
+			return;
+		case "ou":
+			nextToken();
+			logicExp();
+			return;
+			
+		default:
+			//erro
+		}
+	}
+		
+	private void relatExpTerm(){
+
+		switch(currentToken.getValue()){
+
+		case "=":
+			nextToken();
+			identifierOrNumber();
+			return;
+
+		case ">":
+			nextToken();
+			identifierOrNumber();
+			return;
+			
+		case "<":
+			nextToken();
+			identifierOrNumber();
+			return;
+
+		case "<>":
+			nextToken();
+			identifierOrNumber();
+			return;
+			
+		case ">=":
+			nextToken();
+			identifierOrNumber();
+			return;
+
+		case "<=":
+			nextToken();
+			identifierOrNumber();
+			return;	
+		}
+
+	}
+	
+	private void identifierOrNumber(){
+		switch(currentToken.getType()){
+
+		case IDENTIFICADOR:
+			if(lookahead().getValue().equals("<")){
+				array();
+			} else{
+				nextToken();
+				return;
+			}
+		case NUMERO:
+			nextToken();
+			return;
+			
+		default:
+			//erro
+		}
 	}
 
 	private void hasElse() {
