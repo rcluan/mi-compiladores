@@ -3,65 +3,66 @@ package br.uefs.model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import br.uefs.util.LexerGroup;
 
 public class Parser {
 
-	private List<Token> tokens;
 	private Iterator<Token> tokensIt;
-	
-	private Queue<String> parentheses;
 
 	private Token currentToken;
-	private int currentTokenId;
 
 	private List<String> syntacticErrors;
 
 	public Parser(List<Token> tokens) {
-
-		this.setTokens(tokens);
 		
 		this.setTokensIt(tokens.iterator());
 		
-		this.setCurrentTokenId(-1);
-		
 		this.setSyntacticErrors(new ArrayList<>());
-		
-		this.setParentheses(new PriorityQueue<>());
 		
 		nextToken();
 	}
 	
 	public void parse() {
-
-		if(hasProgram(tokens)){
-			
-			parseLL();
-		}else{
-			
-			syntacticErrors.add("O codigo nao possui o trecho 'programa'");
-		}
+		
+		constant();
+		variable();
+		program();
 	}
-	
-	private void parseLL(){
 
+	private void constant() {
+		
 		switch (currentToken.getValue()) {
 		
 		case "const":
 			
 			nextToken();
 			declareConst();
-			parseLL();
-			return;
+			constant();
+		}
+		
+		return;
+	}
+
+	private void variable() {
+		
+		switch (currentToken.getValue()) {
+		
 		case "var":
 			
 			nextToken();
 			declareVar();
-			parseLL();
-			return;
+			terminal(";");
+			variable();
+		}
+		
+		return;
+	}
+
+	private void program() {
+		
+		switch (currentToken.getValue()) {
+		
 		case "programa":
 			
 			nextToken();
@@ -71,27 +72,36 @@ public class Parser {
 			return;
 		
 		default:
+			
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "programa", currentToken.getValue()));
 			return;
 		}
 	}
 
 	private void function() {
-
-		switch(currentToken.getValue()){
 		
-			case "funcao":
+		if(currentToken != null){
+			switch(currentToken.getValue()){
 			
-			nextToken();
-			
-			if(type(lookahead())){
-
+				case "funcao":
+				
 				nextToken();
-				nextToken();
+				
+				if(type(currentToken)){
+	
+					nextToken();
+				}
+	
+				declareFunction();
+				block();
+				
+				function();
+				
+				return;
 			}
-
-			declareFunction();
-			return;
 		}
+		
+		return;
 	}
 
 	private void declareFunction() {
@@ -102,12 +112,46 @@ public class Parser {
 			
 			nextToken();
 			terminal("(");
-			declareVar(); //TODO change
+			declareFunctionParam();
 			terminal(")");
 			return;
 		default:
 			
 			//TODO error expecting id
+			return;
+		}
+	}
+
+	private void declareFunctionParam() {
+		
+		if (type(currentToken)) {
+			
+			nextToken();
+			
+			switch(currentToken.getType()){
+			
+			case IDENTIFICADOR:
+				
+				nextToken();
+				declareFunctParamList();
+				return;
+			default:
+				
+				return;
+			}
+		}
+	}
+
+	private void declareFunctParamList() {
+		
+		switch(currentToken.getValue()){
+		
+		case ",":
+			
+			nextToken();
+			declareFunctionParam();
+			return;
+		case ")":
 			return;
 		}
 	}
@@ -127,6 +171,7 @@ public class Parser {
 			
 			nextToken();
 			declareVar();
+			terminal(";");
 			blockContent();
 			return;
 		case "se":
@@ -140,7 +185,7 @@ public class Parser {
 			terminal("entao");
 			block();
 			
-			hasElse();
+			elseCmd();
 			
 			blockContent();
 			return;
@@ -163,6 +208,10 @@ public class Parser {
 			terminal("(");
 			
 			writeCmdContent();
+			
+			terminal(")");
+			terminal(";");
+			
 			blockContent();
 			return;
 		case "leia":
@@ -171,15 +220,20 @@ public class Parser {
 			terminal("(");
 			
 			readCmdContent();
+			
+			terminal(")");
+			terminal(";");
+			
 			blockContent();
 			return;
 		default:
-			
+
+
 			if(hasProgramEnd()){
 				
 				return;
 			}
-
+			
 			isIdBlockContent();
 			blockContent();
 			
@@ -189,86 +243,74 @@ public class Parser {
 	}
 	
 	private void logicExp() {
-
+		
 		switch(currentToken.getValue()){
-
+		
+		
 		case "(":
-			parentheses.add("(");
-			nextToken();
-			switch(lookahead().getValue()){
-			case ")":
-				parentheses.poll();
-				nextToken();
-				return;
 			
-			default:
-				nextToken();
-				logicExp();
-				return;
-			}
-		case "nao":
 			nextToken();
+			logicExp();
+			terminal(")");
+			logicExpTerm();
+			return;
+		case "nao":
+			
+			nextToken();
+			logicExp();
+			return;
+		default:
+			
 			logicExpRoot();
 			return;
-			
-		default:
-			switch(currentToken.getType()){
-			case IDENTIFICADOR:
-				nextToken();
-				relatExpTerm();
-				return;
-
-			case NUMERO:
-				nextToken();
-				relatExpTerm();
-				return;
-				
-			default:
-				int line = lookahead().getLine();
-				String got = lookahead().getValue();
-				syntacticErrors.add(buildErrorLog(line, "Identificador", "Numero", "(", "nao", got));	
-				return;
-			}
-		}	
+		}
 	}
-	
 	
 	
 	private void logicExpRoot(){
 		switch(currentToken.getType()){
 		
 		case IDENTIFICADOR:
+			
 			nextToken();
 			relatExpTerm();
-		
+			logicExpTerm();
+			return;
+			
 		case NUMERO:
+			
 			nextToken();
 			relatExpTerm();
+			logicExpTerm();
+			return;
+			
 		default:
-			switch(currentToken.getValue()){
-			case "(":
-				nextToken();
-				logicExp();
-			default:
-				//erro
-			}
+			
+			int line = currentToken.getLine();
+			String got = currentToken.getValue();
+			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
+					LexerGroup.NUMERO.name(), "(", "nao", got));
+			
 		}
 	}
 	
 	private void logicExpTerm(){
 		
 		switch(currentToken.getValue()){
+		
 		case "e":
+			
 			nextToken();
 			logicExp();
 			return;
 		case "ou":
+			
 			nextToken();
 			logicExp();
 			return;
 			
 		default:
-			//erro
+			return;
 		}
 	}
 		
@@ -310,16 +352,19 @@ public class Parser {
 	}
 	
 	private void identifierOrNumber(){
+		
 		switch(currentToken.getType()){
 
 		case IDENTIFICADOR:
-			if(lookahead().getValue().equals("<")){
+			
+			nextToken();
+			if(currentToken.getValue().equals("<")){
+				
 				array();
-			} else{
-				nextToken();
-				return;
 			}
+			return;
 		case NUMERO:
+			
 			nextToken();
 			return;
 			
@@ -328,7 +373,7 @@ public class Parser {
 		}
 	}
 
-	private void hasElse() {
+	private void elseCmd() {
 		
 		switch(currentToken.getValue()){
 		
@@ -336,6 +381,7 @@ public class Parser {
 			
 			nextToken();
 			block();
+			
 			return;
 		default:
 			return;
@@ -349,18 +395,21 @@ public class Parser {
 		
 		return false;
 	}
+	
 	private void isIdBlockContent() {
 		
 		switch(currentToken.getType()){
 		
 		case IDENTIFICADOR:
 			
+			nextToken();
 			idBlockContentLookahead();
+			terminal(";");
 			return;
 		default:
 			
-			int line = this.lookahead().getLine();
-			String got = this.lookahead().getValue();
+			int line = currentToken.getLine();
+			String got = currentToken.getValue();
 			
 			syntacticErrors.add(buildErrorLog(line, "var", "se", "enquanto", "escreva", 
 					"leia", LexerGroup.IDENTIFICADOR.name(), got));
@@ -371,24 +420,39 @@ public class Parser {
 
 	private void idBlockContentLookahead() {
 		
-		switch(this.lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case "(":
 			
-			functionCall();
+			nextToken();
+			functionParamContent();
+
+			terminal(")");
+			return;
+		case "<":
 			
+			array();
+			terminal("=");
+			
+			assignValue();
+			return;
+		case "=":
+			
+			nextToken();
+			assignValue();
 			return;
 		default:
 			
-			nextToken();
-			assignTerm();
+			int line = currentToken.getLine();
+			String got = currentToken.getValue();
+			syntacticErrors.add(buildErrorLog(line, "(", "<", "=", got));
 			return;
 		}
 	}
 
 	private void writeCmdContent() {
 		
-		switch(lookahead().getType()){
+		switch(currentToken.getType()){
 		
 		case CARACTERE:
 			
@@ -410,24 +474,20 @@ public class Parser {
 
 	private void writeCmdContentList() {
 		
-		switch(lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case ",":
 			
 			nextToken();
-			terminal(",");
 			writeCmdContent();
 			return;
 		case ")":
 			
-			nextToken();
-			terminal(")");
-			terminal(";");
 			return;
 		default:
 			
-			int line = lookahead().getLine();
-			String got = lookahead().getValue();
+			int line =  currentToken.getLine();
+			String got = currentToken.getValue();
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			return;
@@ -440,12 +500,13 @@ public class Parser {
 		
 		case IDENTIFICADOR:
 			
+			nextToken();
 			readCmdContentList();
 			return;
 		default:
 
-			int line = lookahead().getLine();
-			String got = lookahead().getType().name();
+			int line = currentToken.getLine();
+			String got = currentToken.getType().name();
 			
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), got));
 			return;
@@ -454,72 +515,55 @@ public class Parser {
 
 	private void readCmdContentList() {
 		
-		switch(lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case ",":
 			
 			nextToken();
-			terminal(",");
 			readCmdContent();
 			return;
 		case ")":
 			
-			nextToken();
-			terminal(")");
-			terminal(";");
 			return;
 		default:
 			
-			int line = lookahead().getLine();
-			String got = lookahead().getValue();
+			int line = currentToken.getLine();
+			String got = currentToken.getValue();
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			return;
 		}
 	}
-
-	private void functionCall() {
-		
-		openFunctionCall();
-		terminal(")");
-		terminal(";");
-	}
-
-	private boolean hasProgram(List<Token> tokens) {
-		
-		for(Token token : tokens){
-			
-			if(token.getValue().equals("programa")){
-				
-				return true;
-			}
-		}
-		
-		return false;
-	}
+	
 	private void declareVar() {
 		
 		if (type(currentToken)) {
 			
 			nextToken();
 			
-			switch(currentToken.getType()){
+			declareVarContent();
+		}
+	}
+
+	private void declareVarContent() {
+		
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
 			
-			case IDENTIFICADOR:
-				
-				varTerm();
-				return;
-			default:
-				syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(),
-						currentToken.getType().name()));
-				return;
-			}
+			nextToken();
+			varTerm();
+			return;
+		default:
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(),
+					currentToken.getType().name()));
+			return;
 		}
 	}
 
 	private void varTerm() {
 		
-		switch(this.lookahead().getValue()){
+		switch(this.currentToken.getValue()){
 		
 		case "<":
 			
@@ -530,7 +574,6 @@ public class Parser {
 			return;
 		default:
 			
-			nextToken();
 			varList();
 			//syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
 		}
@@ -542,11 +585,11 @@ public class Parser {
 		
 		case ",":
 			
-			declareVar();
+			nextToken();
+			declareVarContent();
 			return;
 		case ";":
 			
-			nextToken();
 			return;
 
 		default:
@@ -561,18 +604,7 @@ public class Parser {
 		if (type(currentToken)) {
 			
 			nextToken();
-			
-			switch (currentToken.getType()) {
-
-			case IDENTIFICADOR:
-				
-				constTerm();
-				return;
-			default:
-				syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(), 
-						currentToken.getType().name()));
-				return;
-			}
+			declareConstContent();
 		}else{
 			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "inteiro", "real", "cadeia", 
@@ -580,9 +612,26 @@ public class Parser {
 		}
 	}
 
+	private void declareConstContent() {
+		
+
+		switch (currentToken.getType()) {
+
+		case IDENTIFICADOR:
+			
+			nextToken();
+			constTerm();
+			return;
+		default:
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(), 
+					currentToken.getType().name()));
+			return;
+		}
+	}
+
 	private void constTerm() {
 		
-		switch(this.lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case "<":
 			
@@ -600,7 +649,7 @@ public class Parser {
 			constList();
 			return;
 		default:
-			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", this.lookahead().getValue()));
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
 		}
 		
 	}
@@ -611,7 +660,8 @@ public class Parser {
 		
 		case ",":
 			
-			declareConst();
+			nextToken();
+			declareConstContent();
 			return;
 		case ";":
 			
@@ -632,33 +682,9 @@ public class Parser {
 		}
 	}
 
-	private void assignTerm() {
-		
-		switch(currentToken.getValue()){
-		
-		case "<":
-			
-			array();
-			terminal("=");
-			
-			assignValue();
-			terminal(";");
-			return;
-		case "=":
-
-			assignValue();
-			terminal(";");
-			return;
-		default:
-			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
-		}
-		
-	}
-
 	private void assignValue() {
 		
-		nextToken();
-
+		
 		switch(currentToken.getType()){
 		
 		case CADEIA:
@@ -675,6 +701,7 @@ public class Parser {
 			
 			case "<":
 				
+				nextToken();
 				array();
 				return;
 			case "verdadeiro":
@@ -688,9 +715,7 @@ public class Parser {
 			
 			default:
 				
-				//nextToken();
 				aritExp();
-				nextToken();
 				return;
 			}
 		}
@@ -702,81 +727,67 @@ public class Parser {
 		
 		case "(":
 			
-			parentheses.add("(");
-			checkClosure();
+			nextToken();
+			aritExp();
+			terminal(")");
+			aritExpHP();
 			return;
 		default:
 			
-			switch(currentToken.getType()){
-			
-			case IDENTIFICADOR:
-				
-				switch(lookahead().getValue()){
-				
-				case "(":
-
-					openFunctionCall();
-					return;
-				default:
-					
-					aritExpHP();
-					
-					if(!parentheses.isEmpty()){
-						
-						checkClosure();
-					}
-					
-					aritExpHP();
-					return;
-				}
-			case NUMERO:
-				
-				aritExpHP();
-				
-				if(!parentheses.isEmpty()){
-					
-					checkClosure();
-				}
-				
-				aritExpHP();
-				return;
-			default:
-				
-				syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.CADEIA.name(), LexerGroup.CARACTERE.name(), "(",
-							  LexerGroup.IDENTIFICADOR.name(), LexerGroup.NUMERO.name(), currentToken.getValue()));
-				return;
-			}
+			aritExpTerm();
+			return;
 		}
 	}
 	
-	private void checkClosure() {
-
-		switch(lookahead().getValue()){
+	private void aritExpTerm() {
 		
-		case ")":
+
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
+			
 			nextToken();
-			parentheses.poll();
+			switch(currentToken.getValue()){
+			
+			case "(":
+
+				nextToken();
+				
+				functionParamContent();
+				terminal(")");
+				return;
+			case ")":
+				return;
+			default:
+
+				aritExpHP();
+				return;
+			}
+		case NUMERO:
+			
+			nextToken();
+			aritExpHP();
+			
 			return;
 		default:
-			nextToken();
-			aritExp();
+			
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.CADEIA.name(), LexerGroup.CARACTERE.name(), "(",
+						  LexerGroup.IDENTIFICADOR.name(), LexerGroup.NUMERO.name(), currentToken.getValue()));
 			return;
 		}
 	}
 
 	private void aritExpHP(){
 		
-		switch(lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case "*":
 			
-			nextToken();
 			nextToken();
 			aritExp();
 			return;
 		case "/":
 			
-			nextToken();
 			nextToken();
 			aritExp();
 			return;
@@ -788,17 +799,15 @@ public class Parser {
 	}
 	private void aritExpLP() {
 		
-		switch(lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case "+":
 			
-			nextToken();
 			nextToken();
 			aritExp();
 			return;
 		case "-":
 			
-			nextToken();
 			nextToken();
 			aritExp();
 			return;
@@ -810,9 +819,14 @@ public class Parser {
 	}
 	private void array() {
 		
-		nextToken();
 		terminal("<");
+		arrayContent();
+	}
+
+
+	private void arrayContent() {
 		
+
 		switch(currentToken.getType()){
 		
 		case IDENTIFICADOR:
@@ -832,14 +846,13 @@ public class Parser {
 		}
 	}
 
-
 	private void arrayList() {
 		
 		switch(currentToken.getValue()){
 		
 		case ",":
 			nextToken();
-			array();
+			arrayContent();
 			return;
 		case ">":
 			
@@ -851,31 +864,20 @@ public class Parser {
 		}
 		
 	}
-
-	private void openFunctionCall() {
-		
-		nextToken();
-		functionParamContent();
-		
-		if(!currentToken.getValue().equals(")"))
-			nextToken();
-		
-		return;
-	}
 	
 	private void functionParamContent(){
 		
+		if(currentToken.getValue().equals(")"))
+				return;
+		
 		aritExp();
 		
-		switch(lookahead().getValue()){
+		switch(currentToken.getValue()){
 		
 		case ",":
 
 			nextToken();
-			nextToken();
 			functionParamContent();
-			return;
-		default:
 			return;
 		}
 	}
@@ -897,15 +899,8 @@ public class Parser {
 				|| token.getValue().equals("cadeia") || token.getValue().equals("caractere")
 				|| token.getValue().equals("booleano"));
 	}
-	
-	private Token lookahead() {
-		
-		return tokens.get(currentTokenId+1);
-	}
 
 	private void  nextToken(){
-		
-		currentTokenId += 1;
 		
 		if(tokensIt.hasNext()){
 			setCurrentToken(tokensIt.next());
@@ -922,14 +917,6 @@ public class Parser {
 		this.syntacticErrors = syntacticErrors;
 	}
 
-	public List<Token> getTokens() {
-		return tokens;
-	}
-
-	public void setTokens(List<Token> tokens) {
-		this.tokens = tokens;
-	}
-
 	public Iterator<Token> getTokensIt() {
 		return tokensIt;
 	}
@@ -943,19 +930,5 @@ public class Parser {
 	public void setCurrentToken(Token currentToken) {
 
 		this.currentToken = currentToken;
-	}
-	public int getCurrentTokenId() {
-		return currentTokenId;
-	}
-	public void setCurrentTokenId(int currentTokenId) {
-		this.currentTokenId = currentTokenId;
-	}
-
-	public Queue<String> getParentheses() {
-		return parentheses;
-	}
-
-	public void setParentheses(Queue<String> parentheses) {
-		this.parentheses = parentheses;
 	}
 }

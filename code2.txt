@@ -1,12 +1,33 @@
-const inteiro max = conta(2+2);
-var booleano numeros<<max>>;
+const inteiro max = 10, max2 = 2;
 
-var real valor;
+var real lista<<max>>;
+var inteiro i, j;
 
 programa
   inicio
-    var cadeia hello;
-    valor = conta();
-    valor = (valor / 5)*10;
-    escreva(conta());
+    i = 0;
+    j = 1;
+    lista = <<99,50,4,5,6,1,2,3,10,12>>;
+    bubblesort();
+  fim
+
+funcao bubblesort()
+  inicio
+    var inteiro max_i, max_j;
+    max_i = max-2;
+    max_j = max-1;
+    enquanto(i < max_i) faca
+      inicio
+        enquanto(j < max_j) faca
+          inicio
+            se(lista<<i>> > lista<<j>>) entao
+              inicio
+                var real temp;
+                temp = lista<<i>>;
+                lista<<i>> = lista<<j>>;
+                lista<<j>> = temp;
+              fim
+          fim
+        j = i +1;
+      fim
   fim
