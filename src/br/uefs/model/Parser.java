@@ -454,7 +454,7 @@ public class Parser {
 			String got = currentToken.getValue();
 			syntacticErrors.add(buildErrorLog(line, "(", "<", "=", got));
 			
-			errorRecovery(";");
+			errorRecovery(new LexerGroup[]{}, new String[]{";"});
 			return;
 		}
 	}
@@ -556,7 +556,7 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "inteiro", "real", "cadeia", 
 					"caractere", "booleano", currentToken.getValue()));
 
-			errorRecovery(";");
+			errorRecovery(new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
 			return;
 		}
 	}
@@ -572,9 +572,13 @@ public class Parser {
 			return;
 		default:
 			
+			String got = currentToken.getType().name() + ": " + currentToken.getValue();
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(),
-					currentToken.getType().name()));
-			errorRecovery(";");
+					got));
+			
+			errorRecovery(new LexerGroup[]{}, new String[]{",",";"});
+			varList();
+			
 			return;
 		}
 	}
@@ -612,7 +616,9 @@ public class Parser {
 		default:
 			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), ",", ";", currentToken.getValue()));
-			errorRecovery(";");
+			
+			errorRecovery(new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{";"});
+			declareVarContent();
 			return;
 		}
 	}
@@ -629,8 +635,10 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "inteiro", "real", "cadeia", 
 					"caractere", "booleano", currentToken.getValue()));
-
-			errorRecovery(";");
+			
+			//next expected token
+			errorRecovery(new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
+			declareConstContent();
 			return;
 		}
 	}
@@ -647,10 +655,12 @@ public class Parser {
 			return;
 		default:
 			
+			String got = currentToken.getType().name() + ": " + currentToken.getValue();
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(), 
-					currentToken.getType().name()));
+					got));
 			
-			errorRecovery(";");
+			errorRecovery(new LexerGroup[]{}, new String[]{",", ";"});
+			constList();
 			return;
 		}
 	}
@@ -663,11 +673,21 @@ public class Parser {
 			
 			nextToken();
 			array();
-			terminal("=");
+			assignConstTerm();
 			
-			assignValue();
-			constList();
 			return;
+		default:
+			
+			assignConstTerm();
+			return;
+		}
+		
+	}
+	
+	private void assignConstTerm() {
+		
+		switch(currentToken.getValue()){
+		
 		case "=":
 			
 			nextToken();
@@ -676,11 +696,10 @@ public class Parser {
 			return;
 		default:
 			
-			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
-			errorRecovery(";");
-			return;
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "=", currentToken.getValue()));
+			errorRecovery(new LexerGroup[]{}, new String[]{",", ";"});
+			constList();
 		}
-		
 	}
 
 	private void constList() {
@@ -698,7 +717,8 @@ public class Parser {
 		default:
 			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), ",", ";", currentToken.getValue()));
-			errorRecovery(";");
+			errorRecovery(new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{";"});
+			declareConstContent();
 			return;
 		}
 		
@@ -920,9 +940,9 @@ public class Parser {
 		}
 	}
 	
-	private void errorRecovery(String syncToken){
+	private void errorRecovery(LexerGroup[] syncTokensType, String[] syncTokens){
 		
-		while(!currentToken.getValue().equals(syncToken) && currentToken != null){
+		while(!(findSyncToken(syncTokens) || findSyncToken(syncTokensType)) && currentToken != null){
 			
 			nextToken();
 		}
@@ -930,14 +950,26 @@ public class Parser {
 		return;
 	}
 	
-	private void errorRecovery(LexerGroup syncToken){
+	private boolean findSyncToken(String[] syncTokens) {
 		
-		while(!currentToken.getType().equals(syncToken) && currentToken != null){
+		for(String syncToken : syncTokens){
 			
-			nextToken();
+			if(currentToken.getValue().equals(syncToken))
+				return true;
 		}
 		
-		return;
+		return false;
+	}
+	
+	private boolean findSyncToken(LexerGroup[] syncTokens) {
+		
+		for(LexerGroup syncToken : syncTokens){
+			
+			if(currentToken.getType().equals(syncToken))
+				return true;
+		}
+		
+		return false;
 	}
 
 	private String buildErrorLog(int line, String... names) {
