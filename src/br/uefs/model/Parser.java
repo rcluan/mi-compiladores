@@ -38,6 +38,7 @@ public class Parser {
 			
 			nextToken();
 			declareConst();
+			terminal(";");
 			constant();
 		}
 		
@@ -452,6 +453,8 @@ public class Parser {
 			int line = currentToken.getLine();
 			String got = currentToken.getValue();
 			syntacticErrors.add(buildErrorLog(line, "(", "<", "=", got));
+			
+			errorRecovery(";");
 			return;
 		}
 	}
@@ -546,8 +549,15 @@ public class Parser {
 		if (type(currentToken)) {
 			
 			nextToken();
-			
 			declareVarContent();
+			return;
+		}else{
+			
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "inteiro", "real", "cadeia", 
+					"caractere", "booleano", currentToken.getValue()));
+
+			errorRecovery(";");
+			return;
 		}
 	}
 
@@ -561,8 +571,10 @@ public class Parser {
 			varTerm();
 			return;
 		default:
+			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(),
 					currentToken.getType().name()));
+			errorRecovery(";");
 			return;
 		}
 	}
@@ -581,7 +593,7 @@ public class Parser {
 		default:
 			
 			varList();
-			//syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
+			return;
 		}
 	}
 
@@ -597,9 +609,10 @@ public class Parser {
 		case ";":
 			
 			return;
-
 		default:
+			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), ",", ";", currentToken.getValue()));
+			errorRecovery(";");
 			return;
 		}
 	}
@@ -611,10 +624,14 @@ public class Parser {
 			
 			nextToken();
 			declareConstContent();
+			return;
 		}else{
 			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "inteiro", "real", "cadeia", 
 					"caractere", "booleano", currentToken.getValue()));
+
+			errorRecovery(";");
+			return;
 		}
 	}
 
@@ -629,8 +646,11 @@ public class Parser {
 			constTerm();
 			return;
 		default:
+			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), LexerGroup.IDENTIFICADOR.name(), 
 					currentToken.getType().name()));
+			
+			errorRecovery(";");
 			return;
 		}
 	}
@@ -655,7 +675,10 @@ public class Parser {
 			constList();
 			return;
 		default:
+			
 			syntacticErrors.add(buildErrorLog(currentToken.getLine(), "<", "=", currentToken.getValue()));
+			errorRecovery(";");
+			return;
 		}
 		
 	}
@@ -671,7 +694,11 @@ public class Parser {
 			return;
 		case ";":
 			
-			nextToken();
+			return;
+		default:
+			
+			syntacticErrors.add(buildErrorLog(currentToken.getLine(), ",", ";", currentToken.getValue()));
+			errorRecovery(";");
 			return;
 		}
 		
@@ -891,6 +918,26 @@ public class Parser {
 			functionParamContent();
 			return;
 		}
+	}
+	
+	private void errorRecovery(String syncToken){
+		
+		while(!currentToken.getValue().equals(syncToken) && currentToken != null){
+			
+			nextToken();
+		}
+		
+		return;
+	}
+	
+	private void errorRecovery(LexerGroup syncToken){
+		
+		while(!currentToken.getType().equals(syncToken) && currentToken != null){
+			
+			nextToken();
+		}
+		
+		return;
 	}
 
 	private String buildErrorLog(int line, String... names) {
