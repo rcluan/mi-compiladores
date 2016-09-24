@@ -226,13 +226,9 @@ public class Parser {
 			
 			blockContent();
 			return;
+		case "fim":
+			return;
 		default:
-
-
-			if(hasProgramEnd()){
-				
-				return;
-			}
 			
 			isIdBlockContent();
 			blockContent();
@@ -329,7 +325,16 @@ public class Parser {
 			return;
 			
 		case "<":
+			
 			nextToken();
+			
+			if(currentToken.getValue().equals("<")){
+				
+				array();
+				relatExpTerm();
+				return;
+			}
+			
 			identifierOrNumber();
 			return;
 
@@ -360,6 +365,7 @@ public class Parser {
 			nextToken();
 			if(currentToken.getValue().equals("<")){
 				
+				nextToken();
 				array();
 			}
 			return;
@@ -369,7 +375,14 @@ public class Parser {
 			return;
 			
 		default:
-			//erro
+			
+			int line = currentToken.getLine();
+			String got = currentToken.getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
+					LexerGroup.NUMERO.name(), got));
+			
+			return;
 		}
 	}
 
@@ -386,14 +399,6 @@ public class Parser {
 		default:
 			return;
 		}
-	}
-
-	private boolean hasProgramEnd(){
-		
-		if(currentToken.getValue().equals("fim"))
-			return true;
-		
-		return false;
 	}
 	
 	private void isIdBlockContent() {
@@ -431,6 +436,7 @@ public class Parser {
 			return;
 		case "<":
 			
+			nextToken();
 			array();
 			terminal("=");
 			
@@ -749,6 +755,11 @@ public class Parser {
 			nextToken();
 			switch(currentToken.getValue()){
 			
+			case "<":
+				
+				nextToken();
+				array();
+				return;
 			case "(":
 
 				nextToken();

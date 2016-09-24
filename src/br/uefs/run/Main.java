@@ -37,6 +37,9 @@ public class Main {
 				Parser parser = new Parser(lexer.getTokens());
 				parser.parse();
 				
+				if(parser.getSyntacticErrors().isEmpty() && parser.getCurrentToken() == null)
+					System.out.println("Sucesso");
+				
 				for(String error : parser.getSyntacticErrors())
 					System.out.println(error);
 			}else{
