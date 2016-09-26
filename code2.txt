@@ -1,6 +1,5 @@
-const inteiro max = 10, max2 = 2;
-
-var real lista<<max>>;
+const inteiro 
+var lista<<max>>;
 var inteiro i, j;
 
 programa
