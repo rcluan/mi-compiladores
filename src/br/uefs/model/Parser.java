@@ -322,6 +322,7 @@ public class Parser {
 			blockContent();
 			return;
 		case "fim":
+			
 			return;
 		default:
 			
@@ -633,7 +634,10 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{",", ")", ";"});
+			
+			if(tokenOnSameLine(line))
+				readCmdContentList();
 			
 			return;
 		}
