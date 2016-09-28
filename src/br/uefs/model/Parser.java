@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import br.uefs.util.LexerGroup;
+import br.uefs.util.Preprocessor;
 
 public class Parser {
 
@@ -16,12 +17,15 @@ public class Parser {
 	
 	private int previousLine;
 	private int currentLine;
+	
+	private boolean hasProgramBlock;
 
 	public Parser(List<Token> tokens) {
 		
 		this.setCurrentLine(1);
 		
 		this.setTokensIt(tokens.iterator());
+		this.setHasProgramBlock(Preprocessor.hasProgramBlock(tokens.iterator()));
 		
 		this.setSyntacticErrors(new ArrayList<>());
 		
@@ -29,6 +33,18 @@ public class Parser {
 	}
 	
 	public void parse() {
+		
+		if(hasProgramBlock){
+			
+			parseLL();
+			
+		}else{
+			
+			syntacticErrors.add("Bloco programa não encontrado");
+		}
+	}
+	
+	private void parseLL(){
 		
 		constant();
 		variable();
@@ -89,7 +105,10 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, "programa", currentToken.getValue()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{"const", "var", "funcao", "programa"});
+			
+			function();
+			parseLL();
 			
 			return;
 		}
@@ -97,7 +116,10 @@ public class Parser {
 
 	private void function() {
 		
+		setPreviousLine(currentLine);
+		
 		if(currentToken != null){
+			
 			switch(currentToken.getValue()){
 			
 				case "funcao":
@@ -140,7 +162,15 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{"(", "inicio"});
+			
+			if(tokenOnSameLine(line)){
+				
+				terminal("(");
+				declareFunctionParam();
+				terminal(")");
+			}
+			
 			return;
 		}
 	}
@@ -151,17 +181,55 @@ public class Parser {
 			
 			nextToken();
 			
-			switch(currentToken.getType()){
+			declareFunctionParamContent();
+		}else{
 			
-			case IDENTIFICADOR:
+			int line = (previousLine != currentLine) ? previousLine : currentLine;
+
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{",",")"});
+			
+			/* this condition is a bit more complex than others because
+			 * functions can be declared with empty parameters
+			 * 
+			 * it is only an error if a closing-parentheses has not been found right after
+			 * an open-parentheses
+			 */
+			if(!currentToken.getValue().equals(")")){
 				
-				nextToken();
-				declareFunctParamList();
-				return;
-			default:
+				syntacticErrors.add(buildErrorLog(line, "inteiro", "real", "cadeia", 
+						"caractere", "booleano", currentToken.getValue()));
 				
-				return;
+				if(tokenOnSameLine(line))
+					declareFunctionParamContent();
 			}
+			
+			return;
+		}
+	}
+
+	private void declareFunctionParamContent() {
+		
+		switch(currentToken.getType()){
+		
+		case IDENTIFICADOR:
+			
+			nextToken();
+			declareFunctParamList();
+			return;
+		default:
+			
+			int line = (previousLine != currentLine) ? previousLine : currentLine;
+			
+			String got = currentToken.getType() + ": " + currentToken.getValue();
+			
+			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), got));
+			
+			errorRecovery(line, new LexerGroup[]{}, new String[]{",", ")"});
+			
+			if(tokenOnSameLine(line))
+				declareFunctParamList();
+			
+			return;
 		}
 	}
 
@@ -609,7 +677,7 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, "inteiro", "real", "cadeia", 
 					"caractere", "booleano", currentToken.getValue()));
 
-			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{",", ";"});
 			
 			if(tokenOnSameLine(line))
 				declareVarContent();
@@ -704,7 +772,7 @@ public class Parser {
 					"caractere", "booleano", currentToken.getValue()));
 			
 			//next expected token
-			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{",", ";"});
 			
 			if(tokenOnSameLine(line))
 				declareConstContent();
@@ -1158,5 +1226,13 @@ public class Parser {
 
 	public void setCurrentLine(int currentLine) {
 		this.currentLine = currentLine;
+	}
+
+	public boolean hasProgramBlock() {
+		return hasProgramBlock;
+	}
+
+	public void setHasProgramBlock(boolean minCondition) {
+		this.hasProgramBlock = minCondition;
 	}
 }

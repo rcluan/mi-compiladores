@@ -10,7 +10,7 @@ programa
     bubblesort();
   fim
 
-funcao bubblesort()
+funcao bubblesort ()
   inicio
     var inteiro max_i, max_j;
     max_i = max-2;

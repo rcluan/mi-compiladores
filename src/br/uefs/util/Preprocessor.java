@@ -3,9 +3,11 @@ package br.uefs.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import br.uefs.model.PreprocessedInput;
+import br.uefs.model.Token;
 
 public class Preprocessor {
 
@@ -49,5 +51,18 @@ public class Preprocessor {
 		}
 		
 		return input;
+	}
+	
+	public static boolean hasProgramBlock(Iterator<Token> tokens){
+		
+		while(tokens.hasNext()){
+			
+			Token token = tokens.next();
+			
+			if(token.getValue().equals("programa"))
+				return true;
+		}
+		
+		return false;
 	}
 }
