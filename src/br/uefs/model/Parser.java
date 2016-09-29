@@ -977,6 +977,8 @@ public class Parser {
 			terminal(")");
 			aritExpHP();
 			return;
+		case ")":
+			return;
 		default:
 			
 			aritExpTerm();
@@ -998,6 +1000,8 @@ public class Parser {
 				
 				nextToken();
 				array();
+				
+				aritExpHP();
 				return;
 			case "(":
 
@@ -1005,6 +1009,8 @@ public class Parser {
 				
 				functionParamContent();
 				terminal(")");
+				
+				aritExpHP();
 				return;
 			case ")":
 				return;
@@ -1026,7 +1032,11 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.CADEIA.name(), LexerGroup.CARACTERE.name(), "(",
 						  LexerGroup.IDENTIFICADOR.name(), LexerGroup.NUMERO.name(), currentToken.getValue()));
 			
-			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR, LexerGroup.NUMERO}, new String[]{"(", ")", "+", "-", "/", "*", "<", ","});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR, LexerGroup.NUMERO, LexerGroup.CARACTERE, LexerGroup.NUMERO}, 
+					new String[]{"(", ")", "+", "-", "/", "*", "<", ",", ";"});
+			
+			if(tokenOnSameLine(line))
+				aritExpHP();
 		
 			return;
 		}
@@ -1146,11 +1156,24 @@ public class Parser {
 	
 	private void functionParamContent(){
 		
-		if(currentToken.getValue().equals(")"))
-				return;
+		switch(currentToken.getType()){
 		
-		aritExp();
-		functionParamContentList();
+		case CARACTERE:
+			
+			nextToken();
+			functionParamContentList();
+			return;
+		case CADEIA:
+			
+			nextToken();
+			functionParamContentList();
+			return;
+		default:
+			
+			aritExp();
+			functionParamContentList();
+			return;
+		}
 	}
 	
 	private void functionParamContentList() {

@@ -37,11 +37,14 @@ public class Main {
 				Parser parser = new Parser(lexer.getTokens());
 				parser.parse();
 				
-				if(parser.getSyntacticErrors().isEmpty() && parser.getCurrentToken() == null)
-					System.out.println("Sucesso");
+				if(parser.getSyntacticErrors().isEmpty() && parser.getCurrentToken() == null){
+					parser.getSyntacticErrors().add("Sucesso");
+				}
 				
 				for(String error : parser.getSyntacticErrors())
-					System.out.println(error);
+					System.err.println(error);
+				
+				FileHandler.writeFile(parser.getSyntacticErrors());
 			}else{
 				
 				System.err.println("Erros léxicos no código");

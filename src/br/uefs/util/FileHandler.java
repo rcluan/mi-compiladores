@@ -50,4 +50,26 @@ public class FileHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void writeFile(List<String> results) {
+
+		BufferedWriter writer = null;
+		
+		try {
+			
+			writer = new BufferedWriter(new FileWriter("parser_result.txt"));
+			
+			for(String result : results){
+				
+				writer.write(result.toString());
+				writer.newLine();
+			}
+			
+			writer.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
