@@ -366,14 +366,12 @@ public class Parser {
 			
 			nextToken();
 			relatExpTerm();
-			logicExpTerm();
 			return;
 			
 		case NUMERO:
 			
 			nextToken();
 			relatExpTerm();
-			logicExpTerm();
 			return;
 			
 		default:
@@ -383,7 +381,12 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
 					LexerGroup.NUMERO.name(), "(", "nao", got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{")", "entao", "e", "ou", "nao"});
+			errorRecovery(line, new LexerGroup[]{}, 
+					new String[]{"(", ")", "entao", "faca", "senao", "e", "ou", "nao", ">", "<", "=", ">=", "<=", "<>"});
+			
+			if(tokenOnSameLine(line))
+				relatExpTerm();
+				
 			
 			return;
 			
@@ -459,7 +462,13 @@ public class Parser {
 			String got = currentToken.getType().name() + ": " + currentToken.getValue();
 			syntacticErrors.add(buildErrorLog(line, "=", ">", "<", "<>", ">=", "<=" , got));
 			
-			errorRecovery(line, new LexerGroup[]{LexerGroup.NUMERO, LexerGroup.IDENTIFICADOR}, new String[]{"(" ,")", "e", "ou"});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.NUMERO, LexerGroup.IDENTIFICADOR}, 
+					new String[]{"(" ,")", "e", "ou", "faca", "entao"});
+			
+			if(tokenOnSameLine(line))
+				identifierOrNumber();
+			
+			return;
 		}
 
 	}
@@ -476,10 +485,13 @@ public class Parser {
 				nextToken();
 				array();
 			}
+
+			logicExpTerm();
 			return;
 		case NUMERO:
 			
 			nextToken();
+			logicExpTerm();
 			return;
 			
 		default:
@@ -490,7 +502,10 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
 					LexerGroup.NUMERO.name(), got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{"e", "ou", "(", ")", "inicio"});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{"e", "ou", "nao", "(", ")", "entao", "faca"});
+			
+			if(tokenOnSameLine(line))
+				logicExpTerm();
 			
 			return;
 		}
@@ -1079,7 +1094,11 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(),
 					LexerGroup.NUMERO.name(), currentToken.getType().name()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{";", ">"});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{",", ";", ">", "="});
+			
+			if(!currentToken.getValue().equals("="))
+				if(tokenOnSameLine(line))
+					arrayList();
 			
 			return;
 		}
@@ -1104,7 +1123,13 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ">", currentToken.getValue()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{";", "=", ",", "inteiro", "real", "cadeia", "caractere", "booleano", "e", "ou"});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR, LexerGroup.NUMERO}, 
+					new String[]{";", "=", ",", "e", "ou", 
+							"nao", "(", ")", "faca", "entao", "<", ">", "=", "<=", ">=", "<>"});
+			
+			if(currentToken.getValue().equals(","))
+				if(tokenOnSameLine(line))
+					arrayContent();
 			
 			return;
 		}
@@ -1117,6 +1142,10 @@ public class Parser {
 				return;
 		
 		aritExp();
+		functionParamContentList();
+	}
+	
+	private void functionParamContentList() {
 		
 		switch(currentToken.getValue()){
 		
@@ -1125,9 +1154,13 @@ public class Parser {
 			nextToken();
 			functionParamContent();
 			return;
+		default:
+			
+			
+			return;
 		}
 	}
-	
+
 	private void errorRecovery(int line, LexerGroup[] syncTokensType, String[] syncTokens){
 		
 		while(!(findSyncToken(syncTokens) || findSyncToken(syncTokensType)) && currentToken != null && 
