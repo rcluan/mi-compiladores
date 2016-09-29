@@ -40,7 +40,7 @@ public class Parser {
 			
 		}else{
 			
-			syntacticErrors.add("Bloco programa não encontrado");
+			syntacticErrors.add("Bloco programa nao encontrado");
 		}
 	}
 	
@@ -154,6 +154,7 @@ public class Parser {
 			declareFunctionParam();
 			terminal(")");
 			return;
+			
 		default:
 			
 			int line = (previousLine != currentLine) ? previousLine : currentLine;
@@ -382,7 +383,7 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
 					LexerGroup.NUMERO.name(), "(", "nao", got));
 			
-			//TODO errorRecovery(line, new LexerGroup[]{}, new String[]{")", "entao", "e", "ou", "nao"});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{")", "entao", "e", "ou", "nao"});
 			
 			return;
 			
@@ -450,7 +451,15 @@ public class Parser {
 		case "<=":
 			nextToken();
 			identifierOrNumber();
-			return;	
+			return;
+			
+		default:
+			
+			int line = (previousLine != currentLine) ? previousLine : currentLine;
+			String got = currentToken.getType().name() + ": " + currentToken.getValue();
+			syntacticErrors.add(buildErrorLog(line, "=", ">", "<", "<>", ">=", "<=" , got));
+			
+			errorRecovery(line, new LexerGroup[]{LexerGroup.NUMERO, LexerGroup.IDENTIFICADOR}, new String[]{"(" ,")", "e", "ou"});
 		}
 
 	}
@@ -481,7 +490,7 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(), 
 					LexerGroup.NUMERO.name(), got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{"e", "ou", "(", ")", "inicio"});
 			
 			return;
 		}
@@ -612,7 +621,7 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{";"});
 			
 			return;
 		}
@@ -662,7 +671,7 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
 			
 			return;
 		}
@@ -994,8 +1003,8 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.CADEIA.name(), LexerGroup.CARACTERE.name(), "(",
 						  LexerGroup.IDENTIFICADOR.name(), LexerGroup.NUMERO.name(), currentToken.getValue()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
-			
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR, LexerGroup.NUMERO}, new String[]{"(", ")", "+", "-", "/", "*", "<", ","});
+		
 			return;
 		}
 	}
@@ -1070,7 +1079,7 @@ public class Parser {
 			syntacticErrors.add(buildErrorLog(line, LexerGroup.IDENTIFICADOR.name(),
 					LexerGroup.NUMERO.name(), currentToken.getType().name()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{";", ">"});
 			
 			return;
 		}
@@ -1095,7 +1104,7 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ">", currentToken.getValue()));
 			
-			errorRecovery(line, new LexerGroup[]{}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{}, new String[]{";", "=", ",", "inteiro", "real", "cadeia", "caractere", "booleano", "e", "ou"});
 			
 			return;
 		}
