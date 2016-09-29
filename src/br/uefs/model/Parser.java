@@ -636,7 +636,12 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			
-			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{";"});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.CADEIA, LexerGroup.CARACTERE, 
+					LexerGroup.IDENTIFICADOR, LexerGroup.NUMERO}, 
+					new String[]{")", ";"});
+			
+			if(tokenOnSameLine(line))
+				writeCmdContent();
 			
 			return;
 		}
@@ -686,7 +691,10 @@ public class Parser {
 			
 			syntacticErrors.add(buildErrorLog(line, ",", ")", got));
 			
-			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{});
+			errorRecovery(line, new LexerGroup[]{LexerGroup.IDENTIFICADOR}, new String[]{")", ";"});
+			
+			if(tokenOnSameLine(line))
+				readCmdContent();
 			
 			return;
 		}
