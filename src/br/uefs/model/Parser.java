@@ -261,76 +261,78 @@ public class Parser {
 		
 		setPreviousLine(currentLine);
 		
-		switch(currentToken.getValue()){
-		
-		case "var":
+		if(currentToken != null){
+			switch(currentToken.getValue()){
 			
-			nextToken();
-			declareVar();
-			terminal(";");
-			blockContent();
-			return;
-		case "se":
-			
-			nextToken();
-			terminal("(");
-			
-			logicExp();
-			terminal(")");
-			
-			terminal("entao");
-			block();
-			
-			elseCmd();
-			
-			blockContent();
-			return;
-		case "enquanto":
-			
-			nextToken();
-			terminal("(");
-			
-			logicExp();
-			terminal(")");
-			
-			terminal("faca");
-			block();
-			
-			blockContent();
-			return;
-		case "escreva":
-			
-			nextToken();
-			terminal("(");
-			
-			writeCmdContent();
-			
-			terminal(")");
-			terminal(";");
-			
-			blockContent();
-			return;
-		case "leia":
-			
-			nextToken();
-			terminal("(");
-			
-			readCmdContent();
-			
-			terminal(")");
-			terminal(";");
-			
-			blockContent();
-			return;
-		case "fim":
-			
-			return;
-		default:
-			
-			isIdBlockContent();
-			blockContent();
-			
-			return;
+			case "var":
+				
+				nextToken();
+				declareVar();
+				terminal(";");
+				blockContent();
+				return;
+			case "se":
+				
+				nextToken();
+				terminal("(");
+				
+				logicExp();
+				terminal(")");
+				
+				terminal("entao");
+				block();
+				
+				elseCmd();
+				
+				blockContent();
+				return;
+			case "enquanto":
+				
+				nextToken();
+				terminal("(");
+				
+				logicExp();
+				terminal(")");
+				
+				terminal("faca");
+				block();
+				
+				blockContent();
+				return;
+			case "escreva":
+				
+				nextToken();
+				terminal("(");
+				
+				writeCmdContent();
+				
+				terminal(")");
+				terminal(";");
+				
+				blockContent();
+				return;
+			case "leia":
+				
+				nextToken();
+				terminal("(");
+				
+				readCmdContent();
+				
+				terminal(")");
+				terminal(";");
+				
+				blockContent();
+				return;
+			case "fim":
+				
+				return;
+			default:
+				
+				isIdBlockContent();
+				blockContent();
+				
+				return;
+			}
 		}
 		
 	}
@@ -916,14 +918,19 @@ public class Parser {
 
 	private void terminal(String terminal) {
 		
-		if(currentToken.getValue().equals(terminal)){
-			
-			nextToken();
+		if(currentToken != null){
+			if(currentToken.getValue().equals(terminal)){
+				
+				nextToken();
+			}else{
+				
+				int line = (previousLine != currentLine) ? previousLine : currentLine;
+				
+				syntacticErrors.add(buildErrorLog(line, terminal, currentToken.getValue()));
+			}
 		}else{
 			
-			int line = (previousLine != currentLine) ? previousLine : currentLine;
-			
-			syntacticErrors.add(buildErrorLog(line, terminal, currentToken.getValue()));
+			syntacticErrors.add("Fim de arquivo inesperado");
 		}
 	}
 

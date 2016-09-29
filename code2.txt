@@ -30,5 +30,4 @@ funcao bubblesort ()
               fim
           fim
         j = i +1;
-      fim
   fim
