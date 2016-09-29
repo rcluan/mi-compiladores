@@ -1,7 +1,6 @@
 package br.uefs.run;
 
 import java.io.File;
-import java.util.Scanner;
 
 import br.uefs.model.Lexer;
 import br.uefs.model.Parser;
@@ -14,22 +13,18 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		
-		@SuppressWarnings("resource")
-		Scanner scanner = new Scanner(System.in);
-		
-		System.out.println("Digite o caminho para os códigos");
-
-		String path = scanner.nextLine();
-		String absolutePath = new File("").getAbsolutePath().concat(path);
+		String absolutePath = new File("").getAbsolutePath().concat("/codes");
 		
 		File folder = new File(absolutePath);
 		
 		File[] files = folder.listFiles();
 		
+		System.out.println("Iniciando...");
 		for(File file : files){
 			
 			if(file.getName().contains(".txt")){
+				
+				System.out.println("Analisando arquivo " + file.getName());
 				String[] fileSplitted = file.getName().split("\\.");
 				String filename = fileSplitted[0];
 				
@@ -59,10 +54,11 @@ public class Main {
 					FileHandler.writeFile(parser.getSyntacticErrors(), absolutePath + "/parser/" + filename);
 				}else{
 					
-					System.err.println("Erros léxicos no código");
+					System.err.println("Erros léxicos no código " + file.getName() + " análise sintática não ser feita");
 				}
 			}
 		}
+		System.out.println("Todos arquivos foram analisados");
 	}
 
 }
