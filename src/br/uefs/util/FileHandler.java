@@ -51,13 +51,13 @@ public class FileHandler {
 		}
 	}
 	
-	public static void writeFile(List<String> results) {
+	public static void writeFile(List<String> results, String file) {
 
 		BufferedWriter writer = null;
 		
 		try {
 			
-			writer = new BufferedWriter(new FileWriter("parser_result.txt"));
+			writer = new BufferedWriter(new FileWriter(file+"_result.txt"));
 			
 			for(String result : results){
 				
